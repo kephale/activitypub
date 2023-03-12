@@ -3,6 +3,7 @@ try:
     from sqlalchemy import create_engine, inspect
     from sqlalchemy.orm import scoped_session, sessionmaker
     from sqlalchemy.pool import StaticPool
+    from sqlalchemy.sql import text
 except:
     def create_engine(*args, **kwargs):
         raise Exception("You need to install sqlalchemy")
@@ -23,8 +24,7 @@ class SQLList():
     def __getitem__(self, item):
         if isinstance(item, int):
             result = self.database.execute(
-                """SELECT blob_data FROM %s WHERE rowid = :rowid"""
-                % (self.name), {"rowid": item})
+                text(f"SELECT blob_data FROM {self.name} WHERE rowid = {item}"))
             item = result.fetchone()
             if item:
                 item = json.loads(item[0], cls=JSONDecoder)
@@ -208,11 +208,11 @@ class SQLDatabase(Database):
     def build_table(self, name):
         try:
             self.execute(
-                """CREATE TABLE %s (
+                text("""CREATE TABLE %s (
                     rowid INTEGER PRIMARY KEY ASC,
                     oid CHAR(24),
                     blob_data BLOB
-                )""" % name)
+                )""" % name))
             self.commit()
         except:
             self.rollback()
