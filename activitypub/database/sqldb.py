@@ -47,8 +47,7 @@ class SQLList():
             # update it
             try:
                 self.database.execute(
-                    """UPDATE %s SET blob_data = :s WHERE rowid = :rowid;"""
-                    % (self.name), {"s": s, "rowid": item})
+                    text(f"UPDATE {self.name} SET blob_data = {s} WHERE rowid = {item};"))
                 self.database.commit()
             except:
                 self.database.rollback()
@@ -58,8 +57,7 @@ class SQLList():
             oid = str(value["_id"])
             try:
                 self.database.execute(
-                    """INSERT INTO %s (blob_data, oid, rowid) VALUES (:s, :oid, :rowid);"""
-                    % (self.name), {"s": s, "rowid": item, "oid": oid})
+                    text(f"INSERT INTO {self.name} (blob_data, oid, rowid) VALUES ({s}, {oid}, {item});"))
                 self.database.commit()
             except:
                 self.database.rollback()
@@ -68,11 +66,9 @@ class SQLList():
     def __delitem__(self, key):
         try:
             self.database.execute(
-                """DELETE FROM %s WHERE rowid = :rowid;"""
-                % (self.name), {"rowid": key})
+                text(f"DELETE FROM {self.name} WHERE rowid = {key};"))
             self.database.execute(
-                """UPDATE %s SET rowid = (rowid - 1) WHERE rowid > :rowid;"""
-                % self.name, {"rowid": key})
+                text(f"UPDATE {self.name} SET rowid = {(key - 1)} WHERE rowid > {key}"))
             self.database.commit()
         except:
             self.database.rollback()
@@ -80,7 +76,7 @@ class SQLList():
 
     def clear(self):
         try:
-            self.database.execute("DELETE from %s;" % self.name)
+            self.database.execute(f"DELETE from {self.name};")
             self.database.commit()
         except:
             self.database.rollback()
@@ -91,7 +87,7 @@ class SQLList():
         self[pos] = item
 
     def __len__(self):
-        result = self.database.execute("SELECT count(1) FROM %s" % self.name)
+        result = self.database.execute(f"SELECT count(1) FROM {self.name}")
         row = result.fetchone()
         return row[0]
 
