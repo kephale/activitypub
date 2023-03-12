@@ -76,7 +76,7 @@ class SQLList():
 
     def clear(self):
         try:
-            self.database.execute(f"DELETE from {self.name};")
+            self.database.execute(text(f"DELETE from {self.name};"))
             self.database.commit()
         except:
             self.database.rollback()
@@ -87,7 +87,7 @@ class SQLList():
         self[pos] = item
 
     def __len__(self):
-        result = self.database.execute(f"SELECT count(1) FROM {self.name}")
+        result = self.database.execute(text(f"SELECT count(1) FROM {self.name}"))
         row = result.fetchone()
         return row[0]
 
